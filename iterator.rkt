@@ -33,9 +33,9 @@
        [label "Tick"]
        ; Callback procedure for a button click:
        (callback (lambda (button event)
-                   (set! grid (update-grid grid))
-                   (set! max-grid-length (+ max-grid-length 2))
-                   (set! max-grid-height (+ max-grid-height 1))
+                   (set! grid (skip-to grid (string->number (send num-text-field get-value))))
+                   (set! max-grid-length (length (first grid)))
+                   (set! max-grid-height (length grid))
                    (send canvas on-paint)         ; repaint
                    ))))
 
@@ -52,17 +52,23 @@
                    (send canvas on-paint)
                    ))))
 
+;; skip to how many iterations later
+(define num-text-field
+  (new text-field% [parent button-panel]
+       [label "skip"]
+       [init-value "1"]
+       ))
+
 ;; seperate frame to update the rule
 (define rule-frame (new frame%
                         [label "rules"]
                         [width 900]
-                        [height 500]))
+                        [height 200]))
 ;; organise buttons horizontally
 (define rule-panel (new horizontal-panel%
                         [parent rule-frame]
-                        [spacing 10]
-                        [horiz-margin 10]
-                        [stretchable-height #t]
+                        [spacing 25]
+                        [stretchable-height #f]
                         [alignment '(center top)]))
 ;; view changes to the rule
 (define rule-canvas (new canvas%
@@ -165,7 +171,7 @@
             )
           ]
     (send dc clear)
-    (draw-mesh)
+    (cond [(> h-spacing 10) (draw-mesh)])
     (draw-grid)
     ;;(write (list w h h-spacing v-spacing))
     ;;(printf "\n")
@@ -176,7 +182,7 @@
           (define h (send canvas get-height))
           (define side-length 30)
           (define h-spacing (/ w 9))
-          (define h-offset (/ h-spacing 2))
+          (define h-offset (/ (- h-spacing side-length) 2))
           (define v-offset side-length)
           (define (draw-rule-0)
             (send dc set-brush "grey" 'cross-hatch)
@@ -306,6 +312,18 @@
   (cond [(= (length row) 2) empty]
         [else (cons (rule (first row) (second row) (third row))
                     (update-grid-helper (rest row) rule))]))
+
+(define (binary-list->num lst)
+  (local [(define p 0)(define sum 0)]
+    (for ([n lst])
+      (set! sum (+ sum (expt 2 p)))
+      (set! p (+ p 1)))
+    sum))
+
+(define (skip-to grid n)
+  (cond [(> n 0) (skip-to (update-grid grid) (- n 1))]
+        [else grid]))
+  
 
 (send rule-panel min-height 10)
 (send frame show #t)
