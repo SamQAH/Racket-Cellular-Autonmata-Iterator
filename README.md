@@ -4,3 +4,5 @@ A graphic user interface for exploring binary rule autonmatons, writen with rack
 the program will produce two windows,
 One will be displaying the result of each iteration, press "Tick" button located at the bottom of the window to step forward in the simulation
 The other is for changing the rules of iteration, press "Flip" to change the corresponding rule.
+
+Check out rule 0 1 0 1 1 0 0 0
